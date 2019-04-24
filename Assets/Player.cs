@@ -14,21 +14,20 @@ namespace Assets
         [SerializeField]
         private Color _linesColor = Color.black;
 
-        LinesController _linesController;
-        Vector2 _start;
-        Vector2 _end;
+        private LinesController _linesController;
+        private Vector2 _start;
+        private Vector2 _end;
 
-        void Awake()
+        private void Awake()
         {
             _linesController = new LinesController( _defaultMaterial, _maxLinesCount, _linesColor );
         }
 
-        void Update()
+        private void Update()
         {
             if ( Input.GetMouseButtonDown( 0 ) )
             {
                 _start = Camera.main.ScreenToWorldPoint( Input.mousePosition );
-                print( _start );
             }
             if ( Input.GetMouseButtonUp( 0 ) )
             {
