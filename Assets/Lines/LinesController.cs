@@ -36,5 +36,14 @@ namespace Assets.Lines
                 _lines.RemoveAt( _lines.Count - 1 );
             }
         }
+
+        public void DestroyAll()
+        {
+            foreach (GameObject line in _lines)
+            {
+                Object.Destroy(line);
+            }
+            _lines.Clear();
+        }
     }
 }
