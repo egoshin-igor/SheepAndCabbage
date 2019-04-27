@@ -12,7 +12,7 @@ namespace Assets.Lines
             var result = new GameObject( "Line" );
             var lineRenderer = result.AddComponent<LineRenderer>();
             lineRenderer.SetColor( color );
-            lineRenderer.SetWidth( 0.3f );
+            lineRenderer.SetWidth( 0.1f );
             lineRenderer.positionCount = 2;
             lineRenderer.SetPosition( 0, startV3 );
             lineRenderer.SetPosition( 1, endV3 );
