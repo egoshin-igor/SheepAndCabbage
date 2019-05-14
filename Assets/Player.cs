@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Assets.Enums;
 using Assets.Lines;
 using UnityEngine;
@@ -35,7 +36,6 @@ namespace Assets
             if ( Input.GetMouseButtonUp( 0 ) )
             {
                 _end = Camera.main.ScreenToWorldPoint( Input.mousePosition );
-                _linesController.DrawLine( new Line( _start, _end ) );
 
                 Vector2 _screenStart = Camera.main.WorldToScreenPoint( _start );
                 Vector2 _startPoint = new Vector2( _screenStart.x / Screen.width, _screenStart.y / Screen.height );
@@ -44,6 +44,7 @@ namespace Assets
                 Vector2 _endPoint = new Vector2( _screenEnd.x / Screen.width, _screenEnd.y / Screen.height );
 
                 _lines.Add( new LinePlain( _startPoint, _endPoint ) );
+                _linesController.DrawLine( _lines.Last().GetPointsForFullScreen() );
                 print( IsWon() );
                 if ( IsWon() )
                 {
