@@ -220,10 +220,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 519420028}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5970c431f67ee214d8160126cbcaaa31, type: 3}
+  m_Script: {fileID: 11500000, guid: 9e4ada28f03c7b14d94a6ebae8712b72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _defaultMaterial: {fileID: 2100000, guid: b3ab04f4f5513024886646f9119e77c2, type: 2}
   _cabbage: {fileID: 6547064849461152619, guid: face0828bc8a6ce4ba85cad9b3e49cc6,
     type: 3}
   _sheep: {fileID: 7601844991268628226, guid: 0283087c2cad23b4d9878155d1deba75, type: 3}
+  _charactersCount: 40
+  _minDistance: 0.05

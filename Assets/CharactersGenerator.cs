@@ -1,57 +1,118 @@
 ﻿using System.Collections.Generic;
 using Assets.Enums;
+using Assets.Lines;
 using UnityEngine;
 
 namespace Assets
 {
-    public class CharactersGenerator
+    public class CharactersGenerator : MonoBehaviour
     {
-        private readonly GameObject _cabbage;
-        private readonly GameObject _sheep;
-        private readonly GameObject _parent;
-        private readonly List<GameObject> _characters = new List<GameObject>();
+        private const int SpinCount = 200;
+
+        [SerializeField]
+        private Material _defaultMaterial = null;
+        [SerializeField]
+        private GameObject _cabbage = null;
+        [SerializeField]
+        private GameObject _sheep = null;
+        [SerializeField]
+        private int _charactersCount = 30;
+        [SerializeField]
+        private double _minDistance = 0.05;
+
+        private LinesController _linesController;
+        private System.Random _random = new System.Random();
 
         private System.Random _randomizer = new System.Random();
         private int _characterSeparator = 0;
 
-        public CharactersGenerator( GameObject cabbage, GameObject sheep, GameObject parent )
+        public List<Character> Characters { get; } = new List<Character>();
+
+        void Start()
         {
-            _cabbage = cabbage;
-            _sheep = sheep;
-            _parent = parent;
+            _linesController = new LinesController( _defaultMaterial, 3, Color.black );
         }
 
-        public void Generate( LinePlain lp1, LinePlain lp2, LinePlain lp3 )
+        void Update()
         {
-            _characterSeparator = _randomizer.Next( 1000 ) % 2;
-
-            for ( int i = 0; i < 30; i++ )
+            if ( Input.GetKeyDown( "space" ) )
             {
-                int k = 0;
-                Vector2 point = GetRandomPoint();
-                k += lp1.Relation( point ) == LineRelation.Above ? 1 : 0;
-                k += lp2.Relation( point ) == LineRelation.Above ? 1 : 0;
-                k += lp3.Relation( point ) == LineRelation.Above ? 1 : 0;
-                var character = k % 2 == _characterSeparator ? _cabbage : _sheep;
-                _characters.Add( GenerateCharacter( point, character ) );
+                Generate();
+            }
+        }
+
+        public void Generate()
+        {
+            bool isGenerated = false;
+            while ( !isGenerated )
+            {
+                isGenerated = true;
+                _linesController.DestroyAll();
+                DestroyGenerated();
+
+                Vector2 p1 = GetRandomPointBySector( 0 );
+                Vector2 p2 = GetRandomPointBySector( 1 );
+                Vector2 p3 = GetRandomPointBySector( 2 );
+                LinePlain lp1 = new LinePlain( p1, p2 );
+                LinePlain lp2 = new LinePlain( p2, p3 );
+                LinePlain lp3 = new LinePlain( p3, p1 );
+
+                int currentSpin = 0;
+                for ( int i = 0; i < _charactersCount; i++ )
+                {
+                    currentSpin = 0;
+                    bool isPointHasMinDistanceToLines, isPointHasMinDistanceToPoints = false;
+                    Vector2 point;
+                    do
+                    {
+                        point = GetRandomPoint();
+                        currentSpin++;
+
+                        isPointHasMinDistanceToLines = IsPointHasMinDistanceToLines( new List<LinePlain> { lp1, lp2, lp3 }, point );
+                        isPointHasMinDistanceToPoints = IsPointHasMinDistanceToPoints( point, Characters );
+                    } while ( ( !isPointHasMinDistanceToLines || !isPointHasMinDistanceToPoints ) && currentSpin <= SpinCount );
+                    if ( currentSpin >= SpinCount )
+                    {
+                        isGenerated = false;
+                        break;
+                    }
+                    int k = 0;
+                    k += lp1.Relation( point ) == LineRelation.Above ? 1 : 0;
+                    k += lp2.Relation( point ) == LineRelation.Above ? 1 : 0;
+                    k += lp3.Relation( point ) == LineRelation.Above ? 1 : 0;
+                    CharacterType characterType = k % 2 == _characterSeparator ? CharacterType.Cabbage : CharacterType.Sheep;
+                    Characters.Add( GenerateCharacter( point, characterType ) );
+                }
+
+                // _linesController.DrawLine( lp1.GetPointsForFullScreen() );
+                // _linesController.DrawLine( lp2.GetPointsForFullScreen() );
+                // _linesController.DrawLine( lp3.GetPointsForFullScreen() );
+
+                _characterSeparator = _randomizer.Next( 1000 ) % 2;
             }
         }
 
         public void DestroyGenerated()
         {
-            foreach ( GameObject character in _characters )
+            foreach ( Character character in Characters )
             {
-                Object.Destroy( character );
+                Object.Destroy( character.Itself );
             }
-            _characters.Clear();
+            Characters.Clear();
         }
 
-        private GameObject GenerateCharacter( Vector2 point, GameObject character )
+        private Character GenerateCharacter( Vector2 point, CharacterType characterType )
         {
-            var pointInScreen = Camera.main.ScreenToWorldPoint( new Vector2( point.x * Screen.width, point.y * Screen.height ) );
+            Vector3 pointInScreen = Camera.main.ScreenToWorldPoint( new Vector2( point.x * Screen.width, point.y * Screen.height ) );
             var position = new Vector3( pointInScreen.x, pointInScreen.y, 0 );
-
-            return Object.Instantiate( character, position, Quaternion.identity, _parent.transform );
+            GameObject characterTemplate = characterType == CharacterType.Sheep ? _sheep : _cabbage;
+            GameObject characterCopy = Instantiate( characterTemplate, position, Quaternion.identity, transform );
+            return new Character
+            {
+                Itself = characterCopy,
+                Position = point,
+                Type = characterType
+            };
         }
 
         private Vector2 GetRandomPoint()
@@ -59,6 +120,69 @@ namespace Assets
             var point = new Vector2( ( float )_randomizer.NextDouble(), ( float )_randomizer.NextDouble() );
 
             return point;
+        }
+
+        private bool IsPointHasMinDistanceToPoint( Vector2 first, Vector2 second )
+        {
+            double distance = System.Math.Sqrt( ( first.x - second.x ) * ( first.x - second.x ) + ( first.y - second.y ) * ( first.y - second.y ) );
+            return distance >= _minDistance * 1.4;
+        }
+
+        private bool IsPointHasMinDistanceToPoints( Vector2 first, List<Character> characters )
+        {
+            foreach ( Character character in characters )
+            {
+                Vector2 p = character.Position;
+                if ( !IsPointHasMinDistanceToPoint( first, p ) )
+                    return false;
+            }
+
+            return true;
+        }
+
+        private bool IsPointHasMinDistanceToLine( LinePlain lp, Vector2 p )
+        {
+            if ( lp.A == 0 && lp.B == 0 )
+                return false;
+
+            double distance = System.Math.Abs( lp.A * p.x + lp.B * p.y + lp.C ) / System.Math.Sqrt( lp.A * lp.A + lp.B * lp.B );
+
+            return distance >= _minDistance;
+        }
+
+        private bool IsPointHasMinDistanceToLines( List<LinePlain> lps, Vector2 p )
+        {
+            foreach ( LinePlain lp in lps )
+            {
+                if ( !IsPointHasMinDistanceToLine( lp, p ) )
+                    return false;
+            }
+
+            return true;
+        }
+
+        private Vector2 GetRandomPointBySector( int sectorNum )
+        {
+            float x, y;
+            switch ( sectorNum )
+            {
+                case 0:
+                    x = ( float )( _random.NextDouble() * ( 0.9 - 0.1 ) + 0.1 );
+                    y = ( float )( _random.NextDouble() * ( 0.4 - 0.1 ) + 0.1 );
+                    break;
+                case 1:
+                    x = ( float )( _random.NextDouble() * ( 0.4 - 0.1 ) + 0.1 );
+                    y = ( float )( _random.NextDouble() * ( 0.9 - 0.5 ) + 0.5 );
+                    break;
+                case 2:
+                    x = ( float )( _random.NextDouble() * ( 0.9 - 0.5 ) + 0.5 );
+                    y = ( float )( _random.NextDouble() * ( 0.9 - 0.5 ) + 0.5 );
+                    break;
+                default:
+                    throw new System.ApplicationException();
+            }
+
+            return new Vector2( x, y );
         }
     }
 }

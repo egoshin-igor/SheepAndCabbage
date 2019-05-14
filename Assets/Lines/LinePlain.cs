@@ -30,6 +30,8 @@ public class LinePlain
     public LineRelation Relation( Vector2 point )
     {
         float lineY = GetYByX( point.x );
+        if ( !IsPointHasMinDistanceToLine( this, point ) )
+            return LineRelation.OnLine;
 
         return ( point.y < lineY ) ? LineRelation.Under : LineRelation.Above;
     }
@@ -37,5 +39,16 @@ public class LinePlain
     private float GetYByX( float x )
     {
         return -( ( C + A * x ) / B );
+    }
+
+    private bool IsPointHasMinDistanceToLine( LinePlain lp, Vector2 p )
+    {
+        const double minDistance = 0.03;
+        if ( lp.A == 0 && lp.B == 0 )
+            return false;
+
+        double distance = Math.Abs( lp.A * p.x + lp.B * p.y + lp.C ) / Math.Sqrt( lp.A * lp.A + lp.B * lp.B );
+
+        return distance >= minDistance;
     }
 }
