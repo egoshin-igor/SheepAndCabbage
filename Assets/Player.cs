@@ -2,6 +2,7 @@
 using System.Linq;
 using Assets.Enums;
 using Assets.Lines;
+using Assets.Util;
 using UnityEngine;
 
 namespace Assets
@@ -29,7 +30,12 @@ namespace Assets
 
         private void Update()
         {
-            if ( IsDoubleTap() )
+            if ( TapUtil.IsLongTap() )
+            {
+                _linesController.DestroyAll();
+                _lines.Clear();
+            }
+            else if ( TapUtil.IsDoubleTap() )
             {
                 _linesController.DestroyLastLine();
                 if ( _lines.Count != 0 )
@@ -52,12 +58,6 @@ namespace Assets
                     _lines.Clear();
                     _charactersGeneratorScript.Generate();
                 }
-            }
-
-            if ( Input.GetKeyDown( "space" ) )
-            {
-                _linesController.DestroyAll();
-                _lines.Clear();
             }
         }
 
@@ -129,23 +129,6 @@ namespace Assets
 
             _lines.Add( new LinePlain( _startPoint, _endPoint ) );
             _linesController.DrawLine( _lines.Last().GetPointsForFullScreen() );
-        }
-
-        public static bool IsDoubleTap()
-        {
-            bool result = false;
-            float MaxTimeWait = 1;
-            float VariancePosition = 1;
-
-            if ( Input.touchCount == 1 && Input.GetTouch( 0 ).phase == TouchPhase.Began )
-            {
-                float DeltaTime = Input.GetTouch( 0 ).deltaTime;
-                float DeltaPositionLenght = Input.GetTouch( 0 ).deltaPosition.magnitude;
-
-                if ( DeltaTime > 0 && DeltaTime < MaxTimeWait && DeltaPositionLenght < VariancePosition )
-                    result = true;
-            }
-            return result;
         }
     }
 }

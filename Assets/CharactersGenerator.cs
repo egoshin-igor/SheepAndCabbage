@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Assets.Enums;
 using Assets.Lines;
+using Assets.Util;
 using UnityEngine;
 
 namespace Assets
@@ -35,7 +36,7 @@ namespace Assets
 
         void Update()
         {
-            if ( Input.GetKeyDown( "space" ) )
+            if ( TapUtil.IsLongTap() )
             {
                 Generate();
             }
