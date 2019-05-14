@@ -29,37 +29,28 @@ namespace Assets
 
         private void Update()
         {
-            if ( Input.GetMouseButtonDown( 0 ) )
-            {
-                _start = Camera.main.ScreenToWorldPoint( Input.mousePosition );
-            }
-            if ( Input.GetMouseButtonUp( 0 ) )
-            {
-                _end = Camera.main.ScreenToWorldPoint( Input.mousePosition );
-
-                Vector2 _screenStart = Camera.main.WorldToScreenPoint( _start );
-                Vector2 _startPoint = new Vector2( _screenStart.x / Screen.width, _screenStart.y / Screen.height );
-
-                Vector2 _screenEnd = Camera.main.WorldToScreenPoint( _end );
-                Vector2 _endPoint = new Vector2( _screenEnd.x / Screen.width, _screenEnd.y / Screen.height );
-
-                _lines.Add( new LinePlain( _startPoint, _endPoint ) );
-                _linesController.DrawLine( _lines.Last().GetPointsForFullScreen() );
-                print( IsWon() );
-                if ( IsWon() )
-                {
-                    _linesController.DestroyAll();
-                    _lines.Clear();
-                    _charactersGeneratorScript.Generate();
-                }
-
-            }
-            if ( Input.GetMouseButtonUp( 1 ) )
+            if ( IsDoubleTap() )
             {
                 _linesController.DestroyLastLine();
                 if ( _lines.Count != 0 )
                 {
                     _lines.RemoveAt( _lines.Count - 1 );
+                }
+            }
+            else if ( Input.GetMouseButtonDown( 0 ) )
+            {
+                _start = Camera.main.ScreenToWorldPoint( Input.mousePosition );
+            }
+            else if ( Input.GetMouseButtonUp( 0 ) )
+            {
+                _end = Camera.main.ScreenToWorldPoint( Input.mousePosition );
+
+                DrawPlayerLine();
+                if ( IsWon() )
+                {
+                    _linesController.DestroyAll();
+                    _lines.Clear();
+                    _charactersGeneratorScript.Generate();
                 }
             }
 
@@ -124,6 +115,35 @@ namespace Assets
                     newResult.Add( item + relationCode * ( int )System.Math.Pow( 2, i ) );
                 }
                 result = newResult;
+            }
+            return result;
+        }
+
+        private void DrawPlayerLine()
+        {
+            Vector2 _screenStart = Camera.main.WorldToScreenPoint( _start );
+            Vector2 _startPoint = new Vector2( _screenStart.x / Screen.width, _screenStart.y / Screen.height );
+
+            Vector2 _screenEnd = Camera.main.WorldToScreenPoint( _end );
+            Vector2 _endPoint = new Vector2( _screenEnd.x / Screen.width, _screenEnd.y / Screen.height );
+
+            _lines.Add( new LinePlain( _startPoint, _endPoint ) );
+            _linesController.DrawLine( _lines.Last().GetPointsForFullScreen() );
+        }
+
+        public static bool IsDoubleTap()
+        {
+            bool result = false;
+            float MaxTimeWait = 1;
+            float VariancePosition = 1;
+
+            if ( Input.touchCount == 1 && Input.GetTouch( 0 ).phase == TouchPhase.Began )
+            {
+                float DeltaTime = Input.GetTouch( 0 ).deltaTime;
+                float DeltaPositionLenght = Input.GetTouch( 0 ).deltaPosition.magnitude;
+
+                if ( DeltaTime > 0 && DeltaTime < MaxTimeWait && DeltaPositionLenght < VariancePosition )
+                    result = true;
             }
             return result;
         }
