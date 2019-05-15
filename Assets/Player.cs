@@ -2,8 +2,8 @@
 using System.Linq;
 using Assets.Enums;
 using Assets.Lines;
-using Assets.Util;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets
 {
@@ -15,6 +15,10 @@ namespace Assets
         private int _maxLinesCount = 3;
         [SerializeField]
         private Color _linesColor = Color.black;
+        [SerializeField]
+        private Button _clearAllButton = null;
+        [SerializeField]
+        private Button _undoButton = null;
 
         private LinesController _linesController;
         private List<LinePlain> _lines = new List<LinePlain>();
@@ -26,24 +30,28 @@ namespace Assets
         {
             _linesController = new LinesController( _defaultMaterial, _maxLinesCount, _linesColor );
             _charactersGeneratorScript = gameObject.GetComponent<CharactersGenerator>();
+            _clearAllButton.onClick.AddListener( ClearAll );
+            _undoButton.onClick.AddListener( UndoLastAction );
+        }
+
+        public void ClearAll()
+        {
+            _linesController.DestroyAll();
+            _lines.Clear();
+        }
+
+        public void UndoLastAction()
+        {
+            _linesController.DestroyLastLine();
+            if ( _lines.Count != 0 )
+            {
+                _lines.RemoveAt( _lines.Count - 1 );
+            }
         }
 
         private void Update()
         {
-            if ( TapUtil.IsLongTap() )
-            {
-                _linesController.DestroyAll();
-                _lines.Clear();
-            }
-            else if ( TapUtil.IsDoubleTap() )
-            {
-                _linesController.DestroyLastLine();
-                if ( _lines.Count != 0 )
-                {
-                    _lines.RemoveAt( _lines.Count - 1 );
-                }
-            }
-            else if ( Input.GetMouseButtonDown( 0 ) )
+            if ( Input.GetMouseButtonDown( 0 ) )
             {
                 _start = Camera.main.ScreenToWorldPoint( Input.mousePosition );
             }
@@ -121,14 +129,17 @@ namespace Assets
 
         private void DrawPlayerLine()
         {
-            Vector2 _screenStart = Camera.main.WorldToScreenPoint( _start );
-            Vector2 _startPoint = new Vector2( _screenStart.x / Screen.width, _screenStart.y / Screen.height );
+            Vector2 screenStart = Camera.main.WorldToScreenPoint( _start );
+            Vector2 startPoint = new Vector2( screenStart.x / Screen.width, screenStart.y / Screen.height );
 
-            Vector2 _screenEnd = Camera.main.WorldToScreenPoint( _end );
-            Vector2 _endPoint = new Vector2( _screenEnd.x / Screen.width, _screenEnd.y / Screen.height );
+            Vector2 screenEnd = Camera.main.WorldToScreenPoint( _end );
+            Vector2 endPoint = new Vector2( screenEnd.x / Screen.width, screenEnd.y / Screen.height );
 
-            _lines.Add( new LinePlain( _startPoint, _endPoint ) );
-            _linesController.DrawLine( _lines.Last().GetPointsForFullScreen() );
+            if ( Vector2.Distance( startPoint, endPoint ) > 0.05 )
+            {
+                _lines.Add( new LinePlain( startPoint, endPoint ) );
+                _linesController.DrawLine( _lines.Last().GetPointsForFullScreen() );
+            }
         }
     }
 }

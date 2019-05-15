@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Assets.Enums;
 using Assets.Lines;
-using Assets.Util;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Assets
 {
@@ -20,6 +20,8 @@ namespace Assets
         private int _charactersCount = 30;
         [SerializeField]
         private double _minDistance = 0.05;
+        [SerializeField]
+        private Button _generateButton = null;
 
         private LinesController _linesController;
         private System.Random _random = new System.Random();
@@ -32,14 +34,8 @@ namespace Assets
         void Start()
         {
             _linesController = new LinesController( _defaultMaterial, 3, Color.black );
-        }
-
-        void Update()
-        {
-            if ( TapUtil.IsLongTap() )
-            {
-                Generate();
-            }
+            _generateButton.onClick.AddListener( Generate );
+            Generate();
         }
 
         public void Generate()
