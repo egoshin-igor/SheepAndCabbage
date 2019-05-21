@@ -17,8 +17,6 @@ namespace Assets
         [SerializeField]
         private GameObject _sheep = null;
         [SerializeField]
-        private int _charactersCount = 30;
-        [SerializeField]
         private double _minDistance = 0.05;
         [SerializeField]
         private Button _generateButton = null;
@@ -28,17 +26,19 @@ namespace Assets
 
         private System.Random _randomizer = new System.Random();
         private int _characterSeparator = 0;
+        private LevelManager _levelManager;
 
         public List<Character> Characters { get; } = new List<Character>();
 
         void Start()
         {
+            _levelManager = GameObject.Find( "LevelManager" ).GetComponent<LevelManager>();
             _linesController = new LinesController( _defaultMaterial, 3, Color.black );
-            _generateButton.onClick.AddListener( Generate );
-            Generate();
+            _generateButton.onClick.AddListener( () => Generate( _levelManager.CharactersCount ) );
+            Generate( _levelManager.CharactersCount );
         }
 
-        public void Generate()
+        public void Generate( int charactersCount )
         {
             bool isGenerated = false;
             while ( !isGenerated )
@@ -55,7 +55,7 @@ namespace Assets
                 LinePlain lp3 = new LinePlain( p3, p1 );
 
                 int currentSpin = 0;
-                for ( int i = 0; i < _charactersCount; i++ )
+                for ( int i = 0; i < charactersCount; i++ )
                 {
                     currentSpin = 0;
                     bool isPointHasMinDistanceToLines, isPointHasMinDistanceToPoints = false;

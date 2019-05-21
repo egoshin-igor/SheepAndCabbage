@@ -9,6 +9,7 @@ namespace Assets
 {
     public class Player : MonoBehaviour
     {
+        #region SerializField definitions
         [SerializeField]
         private Material _defaultMaterial = null;
         [SerializeField]
@@ -19,25 +20,38 @@ namespace Assets
         private Button _clearAllButton = null;
         [SerializeField]
         private Button _undoButton = null;
+        [SerializeField]
+        private List<GameObject> _linesCount = new List<GameObject>();
+        #endregion
 
+        private LinesCounter _linesCounter;
         private LinesController _linesController;
         private List<LinePlain> _lines = new List<LinePlain>();
         private Vector2 _start;
         private Vector2 _end;
         private CharactersGenerator _charactersGeneratorScript;
+        private Timer _timer;
+        private LevelManager _levelManager;
 
         private void Awake()
         {
+            _timer = GameObject.Find( "Timer" ).GetComponent<Timer>();
+            _levelManager = GameObject.Find( "LevelManager" ).GetComponent<LevelManager>();
+
             _linesController = new LinesController( _defaultMaterial, _maxLinesCount, _linesColor );
             _charactersGeneratorScript = gameObject.GetComponent<CharactersGenerator>();
             _clearAllButton.onClick.AddListener( ClearAll );
             _undoButton.onClick.AddListener( UndoLastAction );
+            _linesCounter = new LinesCounter( _linesCount );
         }
 
         public void ClearAll()
         {
             _linesController.DestroyAll();
             _lines.Clear();
+            _linesCounter.ShowLastHiddens( _maxLinesCount );
+            _timer.Start();
+            _timer.Restart();
         }
 
         public void UndoLastAction()
@@ -46,6 +60,7 @@ namespace Assets
             if ( _lines.Count != 0 )
             {
                 _lines.RemoveAt( _lines.Count - 1 );
+                _linesCounter.ShowLastHidden();
             }
         }
 
@@ -62,11 +77,20 @@ namespace Assets
                 DrawPlayerLine();
                 if ( IsWon() )
                 {
-                    _linesController.DestroyAll();
-                    _lines.Clear();
-                    _charactersGeneratorScript.Generate();
+                    OnWon();
                 }
             }
+        }
+
+        private void OnWon()
+        {
+            _levelManager.OnRoundEnded( _timer.TimeInSeconds );
+            _linesCounter.ShowLastHiddens( _maxLinesCount );
+            _linesController.DestroyAll();
+            _lines.Clear();
+            _charactersGeneratorScript.Generate( _levelManager.CharactersCount );
+            _timer.Start();
+            _timer.Restart();
         }
 
         private bool IsWon()
@@ -139,6 +163,7 @@ namespace Assets
             {
                 _lines.Add( new LinePlain( startPoint, endPoint ) );
                 _linesController.DrawLine( _lines.Last().GetPointsForFullScreen() );
+                _linesCounter.HideLast();
             }
         }
     }
