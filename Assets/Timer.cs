@@ -20,11 +20,11 @@ namespace Assets
 
             _time += Time.deltaTime;
 
-            var minutes = _time / 60;
-            var seconds = _time % 60;
-            var fraction = ( _time * 100 ) % 100;
+            float minutes = _time / 60;
+            float seconds = _time % 60;
+            float fraction = ( _time * 100 ) % 100;
 
-            _timerLabel.text = string.Format( "{0:00} : {1:00}", minutes, seconds, fraction );
+            _timerLabel.text = string.Format( "{0:00} : {1:00}", ( int )minutes, ( int )seconds );
         }
 
         public void Restart()

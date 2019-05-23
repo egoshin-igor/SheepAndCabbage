@@ -1,6 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Assets.Enums;
 using Assets.Lines;
+using Assets.Util;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,6 +30,7 @@ namespace Assets
 
         private System.Random _randomizer = new System.Random();
         private int _characterSeparator = 0;
+        private List<LinePlain> _lps = new List<LinePlain>();
         private LevelManager _levelManager;
 
         public List<Character> Characters { get; } = new List<Character>();
@@ -33,9 +38,19 @@ namespace Assets
         void Start()
         {
             _levelManager = GameObject.Find( "LevelManager" ).GetComponent<LevelManager>();
-            _linesController = new LinesController( _defaultMaterial, 3, Color.black );
-            _generateButton.onClick.AddListener( () => Generate( _levelManager.CharactersCount ) );
+            _linesController = new LinesController( _defaultMaterial, _levelManager.LinesCount, Color.black );
+            _generateButton.onClick.AddListener( OnGenerateButtonClick );
             Generate( _levelManager.CharactersCount );
+        }
+
+        public void OnGenerateButtonClick()
+        {
+            _linesController.ChangeMaxLinesCount( _levelManager.LinesCount );
+            foreach ( LinePlain lp in _lps )
+            {
+                _linesController.DrawLine( lp.GetPointsForFullScreen() );
+            }
+            StartCoroutine( StartNewDelayed() );
         }
 
         public void Generate( int charactersCount )
@@ -44,15 +59,38 @@ namespace Assets
             while ( !isGenerated )
             {
                 isGenerated = true;
-                _linesController.DestroyAll();
                 DestroyGenerated();
 
-                Vector2 p1 = GetRandomPointBySector( 0 );
-                Vector2 p2 = GetRandomPointBySector( 1 );
-                Vector2 p3 = GetRandomPointBySector( 2 );
-                LinePlain lp1 = new LinePlain( p1, p2 );
-                LinePlain lp2 = new LinePlain( p2, p3 );
-                LinePlain lp3 = new LinePlain( p3, p1 );
+                var points = new List<Vector2>();
+
+                for ( int i = 0; i < 4; i++ )
+                {
+                    points.Add( GetRandomPointBySector( i ) );
+                }
+
+                switch ( _levelManager.LinesCount )
+                {
+                    case 3:
+                    case 2:
+                        points.RemoveAt( _random.Next() % 4 );
+                        break;
+                    default:
+                        break;
+                }
+                _lps.Shuffle();
+                if ( _levelManager.LinesCount == 2 )
+                {
+                    _lps.Add( new LinePlain( points[ 0 ], points[ 1 ] ) );
+                    _lps.Add( new LinePlain( points[ 2 ], points[ 1 ] ) );
+                }
+                else
+                {
+                    for ( int i = 0; i < _levelManager.LinesCount; i++ )
+                    {
+                        _lps.Add( new LinePlain( points[ i ], points[ ( i + 1 ) % points.Count ] ) );
+                    }
+                }
+
 
                 int currentSpin = 0;
                 for ( int i = 0; i < charactersCount; i++ )
@@ -65,7 +103,7 @@ namespace Assets
                         point = GetRandomPoint();
                         currentSpin++;
 
-                        isPointHasMinDistanceToLines = IsPointHasMinDistanceToLines( new List<LinePlain> { lp1, lp2, lp3 }, point );
+                        isPointHasMinDistanceToLines = IsPointHasMinDistanceToLines( _lps, point );
                         isPointHasMinDistanceToPoints = IsPointHasMinDistanceToPoints( point, Characters );
                     } while ( ( !isPointHasMinDistanceToLines || !isPointHasMinDistanceToPoints ) && currentSpin <= SpinCount );
                     if ( currentSpin >= SpinCount )
@@ -74,23 +112,31 @@ namespace Assets
                         break;
                     }
                     int k = 0;
-                    k += lp1.Relation( point ) == LineRelation.Above ? 1 : 0;
-                    k += lp2.Relation( point ) == LineRelation.Above ? 1 : 0;
-                    k += lp3.Relation( point ) == LineRelation.Above ? 1 : 0;
+
+                    for ( int j = 0; j < _lps.Count; j++ )
+                    {
+                        k += _lps[ j ].Relation( point ) == LineRelation.Above ? 1 : 0;
+                    }
+
                     CharacterType characterType = k % 2 == _characterSeparator ? CharacterType.Cabbage : CharacterType.Sheep;
                     Characters.Add( GenerateCharacter( point, characterType ) );
                 }
 
-                // _linesController.DrawLine( lp1.GetPointsForFullScreen() );
-                // _linesController.DrawLine( lp2.GetPointsForFullScreen() );
-                // _linesController.DrawLine( lp3.GetPointsForFullScreen() );
-
                 _characterSeparator = _randomizer.Next( 1000 ) % 2;
+                if ( isGenerated )
+                {
+                    if ( Characters.Select( c => c.Type ).Distinct().Count() != 2 )
+                    {
+                        isGenerated = false;
+                    }
+                }
             }
         }
 
         public void DestroyGenerated()
         {
+            _lps.Clear();
+            _linesController.DestroyAll();
             foreach ( Character character in Characters )
             {
                 Object.Destroy( character.Itself );
@@ -110,6 +156,14 @@ namespace Assets
                 Position = point,
                 Type = characterType
             };
+        }
+
+        private IEnumerator StartNewDelayed()
+        {
+            yield return new WaitForSeconds( 1 );
+            _linesController.DestroyAll();
+            Generate( _levelManager.CharactersCount );
+            yield return null;
         }
 
         private Vector2 GetRandomPoint()
@@ -164,16 +218,20 @@ namespace Assets
             switch ( sectorNum )
             {
                 case 0:
-                    x = ( float )( _random.NextDouble() * ( 0.9 - 0.1 ) + 0.1 );
-                    y = ( float )( _random.NextDouble() * ( 0.4 - 0.1 ) + 0.1 );
+                    x = ( float )( _random.NextDouble() * ( 0.45 - 0.1 ) + 0.1 );
+                    y = ( float )( _random.NextDouble() * ( 0.45 - 0.1 ) + 0.1 );
                     break;
                 case 1:
-                    x = ( float )( _random.NextDouble() * ( 0.4 - 0.1 ) + 0.1 );
-                    y = ( float )( _random.NextDouble() * ( 0.9 - 0.5 ) + 0.5 );
+                    x = ( float )( _random.NextDouble() * ( 0.9 - 0.55 ) + 0.55 );
+                    y = ( float )( _random.NextDouble() * ( 0.1 - 0.45 ) + 0.45 );
                     break;
                 case 2:
-                    x = ( float )( _random.NextDouble() * ( 0.9 - 0.5 ) + 0.5 );
-                    y = ( float )( _random.NextDouble() * ( 0.9 - 0.5 ) + 0.5 );
+                    x = ( float )( _random.NextDouble() * ( 0.45 - 0.1 ) + 0.1 );
+                    y = ( float )( _random.NextDouble() * ( 0.9 - 0.55 ) + 0.55 );
+                    break;
+                case 3:
+                    x = ( float )( _random.NextDouble() * ( 0.9 - 0.55 ) + 0.55 );
+                    y = ( float )( _random.NextDouble() * ( 0.9 - 0.55 ) + 0.55 );
                     break;
                 default:
                     throw new System.ApplicationException();

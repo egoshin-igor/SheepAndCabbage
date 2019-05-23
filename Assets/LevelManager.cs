@@ -7,6 +7,9 @@ namespace Assets
 {
     public class LevelManager : MonoBehaviour
     {
+        private const int MinLinesCount = 2;
+        private const int MaxLinesCount = 4;
+
         private const int MinCharactersCount = 6;
         private const int MaxCharactersCount = 40;
 
@@ -16,21 +19,25 @@ namespace Assets
         private Text _diffucultLabel = null;
 
         private List<int> _timeoutForLinesCount;
+        private List<int> _linesCountCfs;
         private int _score = 0;
         private double _difficultCf = 0.01;
 
         public int CharactersCount { get; private set; } = MinCharactersCount;
-        public int LinesCount { get; private set; } = 3;
+        public int LinesCount { get; private set; } = 2;
 
 
         public void Awake()
         {
-            _timeoutForLinesCount = new List<int> { 0, 0, 0, 40, 0 };
+            _timeoutForLinesCount = new List<int> { 0, 0, 20, 40, 60 };
+            _linesCountCfs = new List<int> { 0, 0, 2, 10, 25 };
         }
 
         public void OnRoundEnded( int time )
         {
             _difficultCf = ( ( double )CharactersCount - MinCharactersCount ) / ( MaxCharactersCount - MinCharactersCount );
+            _difficultCf *= 10 / _linesCountCfs[ LinesCount ];
+            _difficultCf = _difficultCf > 1 ? 1 : _difficultCf;
             if ( DoubleUtil.EqualDoubles( _difficultCf, 0 ) )
             {
                 _difficultCf = 0.01;
@@ -53,8 +60,18 @@ namespace Assets
                 CharactersCount = MinCharactersCount;
             }
 
-            _scoreLabel.text = _score.ToString();
+            if ( ( int )( _difficultCf * 100 ) <= 0 && LinesCount != MinLinesCount )
+            {
+                _difficultCf = 0.98;
+                LinesCount -= 1;
+            }
+            else if ( ( int )( _difficultCf * 100 ) >= 100 && LinesCount != MaxCharactersCount )
+            {
+                _difficultCf = 0;
+                LinesCount += 1;
+            }
             _diffucultLabel.text = $"{( int )( _difficultCf * 100 )} / 100";
+            _scoreLabel.text = _score.ToString();
         }
     }
 }

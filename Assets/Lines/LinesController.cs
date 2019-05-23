@@ -9,7 +9,7 @@ namespace Assets.Lines
         private readonly List<GameObject> _lines = new List<GameObject>();
 
         private readonly Material _defaultMaterial;
-        private readonly int _maxLinesCount;
+        private int _maxLinesCount;
         private Color _linesColor;
 
         public LinesController( Material material, int maxLinesCount, Color linesColor )
@@ -17,6 +17,11 @@ namespace Assets.Lines
             _defaultMaterial = material;
             _maxLinesCount = maxLinesCount;
             _linesColor = linesColor;
+        }
+
+        public void ChangeMaxLinesCount( int count )
+        {
+            _maxLinesCount = count;
         }
 
         public void DrawLine( Line line )
@@ -39,9 +44,9 @@ namespace Assets.Lines
 
         public void DestroyAll()
         {
-            foreach (GameObject line in _lines)
+            foreach ( GameObject line in _lines )
             {
-                Object.Destroy(line);
+                Object.Destroy( line );
             }
             _lines.Clear();
         }
