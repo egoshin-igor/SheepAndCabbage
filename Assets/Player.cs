@@ -15,13 +15,13 @@ namespace Assets
         [SerializeField]
         private Material _defaultMaterial = null;
         [SerializeField]
-        private Color _linesColor = Color.black;
-        [SerializeField]
         private Button _clearAllButton = null;
         [SerializeField]
         private Button _undoButton = null;
         [SerializeField]
         private List<GameObject> _linesCount = new List<GameObject>();
+        [SerializeField]
+        private GameObject _winWindow = null;
         #endregion
 
         private LinesCounter _linesCounter;
@@ -35,44 +35,15 @@ namespace Assets
 
         private void Awake()
         {
+            _winWindow.SetActive( false );
             _timer = GameObject.Find( "Timer" ).GetComponent<Timer>();
             _levelManager = GameObject.Find( "LevelManager" ).GetComponent<LevelManager>();
 
-            _linesController = new LinesController( _defaultMaterial, _levelManager.LinesCount, _linesColor );
+            _linesController = new LinesController( _defaultMaterial, _levelManager.LinesCount );
             _charactersGeneratorScript = gameObject.GetComponent<CharactersGenerator>();
             _clearAllButton.onClick.AddListener( ClearAll );
             _undoButton.onClick.AddListener( UndoLastAction );
             _linesCounter = new LinesCounter( _linesCount, _levelManager.LinesCount );
-        }
-
-        public void ClearAll()
-        {
-            _linesController.DestroyAll();
-            _lines.Clear();
-            _linesCounter.ChangeMaxLinesCount( _levelManager.LinesCount );
-            _linesCounter.ShowLastHiddens( _levelManager.LinesCount );
-            _timer.Stop();
-            _linesController.ChangeMaxLinesCount( _levelManager.LinesCount );
-            // todo: отнимание сложности
-            StartCoroutine( StartNewDelayed() );
-        }
-
-        public void UndoLastAction()
-        {
-            _linesController.DestroyLastLine();
-            if ( _lines.Count != 0 )
-            {
-                _lines.RemoveAt( _lines.Count - 1 );
-                _linesCounter.ShowLastHidden();
-            }
-        }
-
-        private IEnumerator StartNewDelayed()
-        {
-            yield return new WaitForSeconds( 1 );
-            _timer.Restart();
-            _timer.Start();
-            yield return null;
         }
 
         private void Update()
@@ -98,12 +69,50 @@ namespace Assets
             _levelManager.OnRoundEnded( _timer.TimeInSeconds );
             _linesController.ChangeMaxLinesCount( _levelManager.LinesCount );
             _linesCounter.ChangeMaxLinesCount( _levelManager.LinesCount );
-            _linesCounter.ShowLastHiddens( _levelManager.LinesCount );
             _linesController.DestroyAll();
             _lines.Clear();
+            _timer.Stop();
+            _winWindow.SetActive( true );
+            StartCoroutine( NewGameDelayed() );
+        }
+
+        private IEnumerator NewGameDelayed()
+        {
+            yield return new WaitForSeconds( 0.5f );
             _charactersGeneratorScript.Generate( _levelManager.CharactersCount );
-            _timer.Start();
+            _winWindow.SetActive( false );
             _timer.Restart();
+            _timer.Start();
+            yield return null;
+        }
+
+        public void ClearAll()
+        {
+            _linesController.DestroyAll();
+            _lines.Clear();
+            _linesCounter.ChangeMaxLinesCount( _levelManager.LinesCount );
+            _timer.Stop();
+            _linesController.ChangeMaxLinesCount( _levelManager.LinesCount );
+            // todo: отнимание сложности
+            StartCoroutine( StartNewDelayed() );
+        }
+
+        public void UndoLastAction()
+        {
+            _linesController.DestroyLastLine();
+            if ( _lines.Count != 0 )
+            {
+                _lines.RemoveAt( _lines.Count - 1 );
+                _linesCounter.ShowLastHidden();
+            }
+        }
+
+        private IEnumerator StartNewDelayed()
+        {
+            yield return new WaitForSeconds( 1 );
+            _timer.Restart();
+            _timer.Start();
+            yield return null;
         }
 
         private bool IsWon()
@@ -174,9 +183,12 @@ namespace Assets
 
             if ( Vector2.Distance( startPoint, endPoint ) > 0.05 )
             {
-                _lines.Add( new LinePlain( startPoint, endPoint ) );
-                _linesController.DrawLine( _lines.Last().GetPointsForFullScreen() );
-                _linesCounter.HideLast();
+                var lp = new LinePlain( startPoint, endPoint );
+                if ( _linesController.DrawLine( lp.GetPointsForFullScreen() ) )
+                {
+                    _lines.Add( lp );
+                    _linesCounter.HideLast();
+                }
             }
         }
     }

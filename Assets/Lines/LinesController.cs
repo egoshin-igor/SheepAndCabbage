@@ -10,13 +10,11 @@ namespace Assets.Lines
 
         private readonly Material _defaultMaterial;
         private int _maxLinesCount;
-        private Color _linesColor;
 
-        public LinesController( Material material, int maxLinesCount, Color linesColor )
+        public LinesController( Material material, int maxLinesCount )
         {
             _defaultMaterial = material;
             _maxLinesCount = maxLinesCount;
-            _linesColor = linesColor;
         }
 
         public void ChangeMaxLinesCount( int count )
@@ -24,13 +22,16 @@ namespace Assets.Lines
             _maxLinesCount = count;
         }
 
-        public void DrawLine( Line line )
+        public bool DrawLine( Line line )
         {
             if ( _lines.Count < _maxLinesCount )
             {
-                GameObject drawedLine = LineDrawer.GetDrawed( line, _linesColor, _defaultMaterial );
+                GameObject drawedLine = LineDrawer.GetDrawed( line, _defaultMaterial );
                 _lines.Add( drawedLine );
+                return true;
             }
+
+            return false;
         }
 
         public void DestroyLastLine()

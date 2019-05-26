@@ -38,7 +38,7 @@ namespace Assets
         void Start()
         {
             _levelManager = GameObject.Find( "LevelManager" ).GetComponent<LevelManager>();
-            _linesController = new LinesController( _defaultMaterial, _levelManager.LinesCount, Color.black );
+            _linesController = new LinesController( _defaultMaterial, _levelManager.LinesCount );
             _generateButton.onClick.AddListener( OnGenerateButtonClick );
             Generate( _levelManager.CharactersCount );
         }
