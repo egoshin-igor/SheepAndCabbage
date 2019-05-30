@@ -22,6 +22,8 @@ namespace Assets
         private List<GameObject> _linesCount = new List<GameObject>();
         [SerializeField]
         private GameObject _winWindow = null;
+        [SerializeField]
+        AudioSource _playerLineDrawingSound;
         #endregion
 
         private LinesCounter _linesCounter;
@@ -33,7 +35,7 @@ namespace Assets
         private Timer _timer;
         private LevelManager _levelManager;
 
-        private void Awake()
+        private void Start()
         {
             _winWindow.SetActive( false );
             _timer = GameObject.Find( "Timer" ).GetComponent<Timer>();
@@ -69,7 +71,6 @@ namespace Assets
             _levelManager.OnRoundEnded( _timer.TimeInSeconds );
             _linesController.ChangeMaxLinesCount( _levelManager.LinesCount );
             _linesCounter.ChangeMaxLinesCount( _levelManager.LinesCount );
-            _linesController.DestroyAll();
             _lines.Clear();
             _timer.Stop();
             _winWindow.SetActive( true );
@@ -79,6 +80,7 @@ namespace Assets
         private IEnumerator NewGameDelayed()
         {
             yield return new WaitForSeconds( 0.5f );
+            _linesController.DestroyAll();
             _charactersGeneratorScript.Generate( _levelManager.CharactersCount );
             _winWindow.SetActive( false );
             _timer.Restart();
@@ -186,6 +188,7 @@ namespace Assets
                 var lp = new LinePlain( startPoint, endPoint );
                 if ( _linesController.DrawLine( lp.GetPointsForFullScreen() ) )
                 {
+                    _playerLineDrawingSound.Play();
                     _lines.Add( lp );
                     _linesCounter.HideLast();
                 }

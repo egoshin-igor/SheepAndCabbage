@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Assets.Util;
 using UnityEngine;
 using UnityEngine.UI;
@@ -24,13 +25,14 @@ namespace Assets
         private double _difficultCf = 0.01;
 
         public int CharactersCount { get; private set; } = MinCharactersCount;
-        public int LinesCount { get; private set; } = 2;
+        public int LinesCount { get; private set; } = MinLinesCount;
 
 
         public void Awake()
         {
             _timeoutForLinesCount = new List<int> { 0, 0, 20, 40, 60 };
             _linesCountCfs = new List<int> { 0, 0, 2, 10, 25 };
+            LoadData();
         }
 
         public void OnRoundEnded( int time )
@@ -38,6 +40,7 @@ namespace Assets
             _difficultCf = ( ( double )CharactersCount - MinCharactersCount ) / ( MaxCharactersCount - MinCharactersCount );
             _difficultCf *= 10 / _linesCountCfs[ LinesCount ];
             _difficultCf = _difficultCf > 1 ? 1 : _difficultCf;
+            _difficultCf = Math.Round( _difficultCf, 2 );
             if ( DoubleUtil.EqualDoubles( _difficultCf, 0 ) )
             {
                 _difficultCf = 0.01;
@@ -70,6 +73,25 @@ namespace Assets
                 _difficultCf = 0;
                 LinesCount += 1;
             }
+            _diffucultLabel.text = $"{( int )( _difficultCf * 100 )} / 100";
+            _scoreLabel.text = _score.ToString();
+            SaveData();
+        }
+
+        private void SaveData()
+        {
+            PlayerPrefs.SetInt( "score", _score );
+            PlayerPrefs.SetFloat( "difficultCf", ( float )_difficultCf );
+            PlayerPrefs.SetInt( "linesCount", LinesCount );
+            PlayerPrefs.SetInt( "charactersCount", CharactersCount );
+        }
+
+        private void LoadData()
+        {
+            _score = PlayerPrefs.GetInt( "score", 0 );
+            _difficultCf = Math.Round( PlayerPrefs.GetFloat( "difficultCf", 0 ), 2 );
+            LinesCount = PlayerPrefs.GetInt( "linesCount", MinLinesCount );
+            CharactersCount = PlayerPrefs.GetInt( "charactersCount", MinCharactersCount );
             _diffucultLabel.text = $"{( int )( _difficultCf * 100 )} / 100";
             _scoreLabel.text = _score.ToString();
         }
