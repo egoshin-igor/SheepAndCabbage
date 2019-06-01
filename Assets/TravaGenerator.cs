@@ -7,9 +7,9 @@ namespace Assets
 {
     class TravaGenerator : MonoBehaviour
     {
-        private const int TravasCount = 220;
-        private const int SpinCount = 200;
-        private readonly double _minDistance = 0.01;
+        private const int TravasCount = 420;
+        private const int SpinCount = 400;
+        private readonly double _minDistance = 0.005;
         [SerializeField]
         private GameObject _trava = null;
         [SerializeField]
@@ -82,7 +82,7 @@ namespace Assets
         private Character GenerateCharacter( Vector2 point )
         {
             Vector3 pointInScreen = Camera.main.ScreenToWorldPoint( new Vector2( point.x * Screen.width, point.y * Screen.height ) );
-            var position = new Vector3( pointInScreen.x, pointInScreen.y, pointInScreen.y );
+            var position = new Vector3( pointInScreen.x, pointInScreen.y, pointInScreen.y + _trava.GetComponent<SpriteRenderer>().size.y );
             GameObject characterTemplate = _trava;
             GameObject characterCopy = Instantiate( characterTemplate, position, Quaternion.identity, transform );
             return new Character

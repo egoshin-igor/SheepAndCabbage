@@ -18,7 +18,7 @@ namespace Assets.Lines
         public void ChangeMaxLinesCount( int maxLinesCount )
         {
             HideAll();
-            _current = 0;
+            _current = -1;
             _maxLinesCount = maxLinesCount;
             ShowLastHiddens( _maxLinesCount );
         }
@@ -33,7 +33,7 @@ namespace Assets.Lines
 
         public bool ShowLastHidden()
         {
-            if ( _current != _maxLinesCount )
+            if ( _current != _maxLinesCount - 1 )
             {
                 _linesCount[ ++_current ].SetActive( true );
                 return true;

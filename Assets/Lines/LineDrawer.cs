@@ -17,7 +17,7 @@ namespace Assets.Lines
             lineRenderer.SetPosition( 1, endV3 );
             lineRenderer.material = new Material( material );
             float distance = Vector2.Distance( line.Start, line.End );
-            lineRenderer.material.mainTextureScale = new Vector2( distance / 40 * 6, 1 );
+            lineRenderer.material.mainTextureScale = new Vector2( distance / 40 * 30, 1 );
 
             return result;
         }

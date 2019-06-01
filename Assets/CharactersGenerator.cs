@@ -147,8 +147,8 @@ namespace Assets
         private Character GenerateCharacter( Vector2 point, CharacterType characterType )
         {
             Vector3 pointInScreen = Camera.main.ScreenToWorldPoint( new Vector2( point.x * Screen.width, point.y * Screen.height ) );
-            var position = new Vector3( pointInScreen.x, pointInScreen.y, pointInScreen.y );
             GameObject characterTemplate = characterType == CharacterType.Sheep ? _sheep : _cabbage;
+            var position = new Vector3( pointInScreen.x, pointInScreen.y, pointInScreen.y + characterTemplate.GetComponent<SpriteRenderer>().size.y );
             GameObject characterCopy = Instantiate( characterTemplate, position, Quaternion.identity, transform );
             return new Character
             {

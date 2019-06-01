@@ -23,7 +23,7 @@ namespace Assets
         [SerializeField]
         private GameObject _winWindow = null;
         [SerializeField]
-        AudioSource _playerLineDrawingSound;
+        private AudioSource _playerLineDrawingSound = null;
         #endregion
 
         private LinesCounter _linesCounter;

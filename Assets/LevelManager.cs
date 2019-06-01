@@ -16,8 +16,15 @@ namespace Assets
 
         [SerializeField]
         private Text _scoreLabel = null;
+
         [SerializeField]
-        private Text _diffucultLabel = null;
+        private Texture2D _progressEmptyImage = null;
+        [SerializeField]
+        private Texture2D _progressFullImage = null;
+        [SerializeField]
+        private Vector2 _barPosition = new Vector2( 20, 40 );
+        [SerializeField]
+        private Vector2 _barSize = new Vector2( 500, 30 );
 
         private List<int> _timeoutForLinesCount;
         private List<int> _linesCountCfs;
@@ -27,6 +34,15 @@ namespace Assets
         public int CharactersCount { get; private set; } = MinCharactersCount;
         public int LinesCount { get; private set; } = MinLinesCount;
 
+        public void OnGUI()
+        {
+            var color = GUI.color;
+            GUI.color = new Color( color.r, color.g, color.b, 0.7f );
+            GUI.DrawTexture( new Rect( _barPosition.x, _barPosition.y, _barSize.x, _barSize.y ), _progressEmptyImage );
+            GUI.color = new Color( color.r, color.g, color.b, 0.9f );
+            GUI.DrawTexture( new Rect( _barPosition.x, _barPosition.y, _barSize.x * Mathf.Clamp01( ( float )_difficultCf ), _barSize.y ), _progressFullImage );
+            GUI.color = color;
+        }
 
         public void Awake()
         {
@@ -73,7 +89,6 @@ namespace Assets
                 _difficultCf = 0;
                 LinesCount += 1;
             }
-            _diffucultLabel.text = $"{( int )( _difficultCf * 100 )} / 100";
             _scoreLabel.text = _score.ToString();
             SaveData();
         }
@@ -92,7 +107,6 @@ namespace Assets
             _difficultCf = Math.Round( PlayerPrefs.GetFloat( "difficultCf", 0 ), 2 );
             LinesCount = PlayerPrefs.GetInt( "linesCount", MinLinesCount );
             CharactersCount = PlayerPrefs.GetInt( "charactersCount", MinCharactersCount );
-            _diffucultLabel.text = $"{( int )( _difficultCf * 100 )} / 100";
             _scoreLabel.text = _score.ToString();
         }
     }

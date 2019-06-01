@@ -1398,7 +1398,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 470d0eb9244c46647986eea095a02eb2, type: 3}
+  m_audioClip: {fileID: 8300000, guid: fab6d0640bfe0254b8285170ecd20ed3, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -1628,6 +1628,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _scoreLabel: {fileID: 1928918951}
   _diffucultLabel: {fileID: 2130803926}
+  _progressEmptyImage: {fileID: 2800000, guid: d05a00184a4dd54458142844083cbf8a, type: 3}
+  _progressFullImage: {fileID: 2800000, guid: 062db015f395d3f4ea3748aa2901dd77, type: 3}
+  _barPosition: {x: 320, y: 20}
+  _barSize: {x: 500, y: 30}
 --- !u!4 &1574052700
 Transform:
   m_ObjectHideFlags: 0
@@ -2011,7 +2015,7 @@ RectTransform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1928918949}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -55}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1019096014}
