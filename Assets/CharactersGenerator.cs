@@ -160,7 +160,7 @@ namespace Assets
 
         private IEnumerator StartNewDelayed()
         {
-            yield return new WaitForSeconds( 1 );
+            yield return new WaitForSeconds( 2f );
             _linesController.DestroyAll();
             Generate( _levelManager.CharactersCount );
             yield return null;

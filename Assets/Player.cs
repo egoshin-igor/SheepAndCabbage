@@ -34,12 +34,14 @@ namespace Assets
         private CharactersGenerator _charactersGeneratorScript;
         private Timer _timer;
         private LevelManager _levelManager;
+        private TravaGenerator _travaGenerator;
 
         private void Start()
         {
             _winWindow.SetActive( false );
             _timer = GameObject.Find( "Timer" ).GetComponent<Timer>();
             _levelManager = GameObject.Find( "LevelManager" ).GetComponent<LevelManager>();
+            _travaGenerator = GameObject.Find( "Background" ).GetComponent<TravaGenerator>();
 
             _linesController = new LinesController( _defaultMaterial, _levelManager.LinesCount );
             _charactersGeneratorScript = gameObject.GetComponent<CharactersGenerator>();
@@ -79,9 +81,10 @@ namespace Assets
 
         private IEnumerator NewGameDelayed()
         {
-            yield return new WaitForSeconds( 0.5f );
+            yield return new WaitForSeconds( 2f );
             _linesController.DestroyAll();
             _charactersGeneratorScript.Generate( _levelManager.CharactersCount );
+            _travaGenerator.Generate( TravaGenerator.TravasCount );
             _winWindow.SetActive( false );
             _timer.Restart();
             _timer.Start();
@@ -111,7 +114,7 @@ namespace Assets
 
         private IEnumerator StartNewDelayed()
         {
-            yield return new WaitForSeconds( 1 );
+            yield return new WaitForSeconds( 2f );
             _timer.Restart();
             _timer.Start();
             yield return null;

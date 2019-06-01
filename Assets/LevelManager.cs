@@ -16,6 +16,8 @@ namespace Assets
 
         [SerializeField]
         private Text _scoreLabel = null;
+        [SerializeField]
+        private Text _pointsPerLevelLabel = null;
 
         [SerializeField]
         private Texture2D _progressEmptyImage = null;
@@ -68,7 +70,8 @@ namespace Assets
                 timeCf = 0;
             }
 
-            _score += ( int )( CharactersCount * timeCf * LinesCount );
+            int newPoints = ( int )( CharactersCount * timeCf * LinesCount );
+            _score += newPoints;
             CharactersCount += ( int )( ( ( timeCf + _difficultCf ) / 2 ) * ( MaxCharactersCount - MinCharactersCount ) * 0.1 );
             if ( CharactersCount > MaxCharactersCount )
             {
@@ -90,6 +93,8 @@ namespace Assets
                 LinesCount += 1;
             }
             _scoreLabel.text = _score.ToString();
+            _pointsPerLevelLabel.text = newPoints.ToString();
+
             SaveData();
         }
 

@@ -5,9 +5,9 @@ using UnityEngine.UI;
 
 namespace Assets
 {
-    class TravaGenerator : MonoBehaviour
+    public class TravaGenerator : MonoBehaviour
     {
-        private const int TravasCount = 420;
+        public const int TravasCount = 420;
         private const int SpinCount = 400;
         private readonly double _minDistance = 0.005;
         [SerializeField]
@@ -32,7 +32,7 @@ namespace Assets
 
         private IEnumerator StartNewDelayed()
         {
-            yield return new WaitForSeconds( 1 );
+            yield return new WaitForSeconds( 2 );
             Generate( TravasCount );
             yield return null;
         }
