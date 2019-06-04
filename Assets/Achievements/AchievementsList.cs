@@ -14,6 +14,7 @@ namespace Assets.Achievements
         private void Awake()
         {
             var templatePosition = _achievementTemplate.transform.position;
+            templatePosition.y += 340;
             for ( int i = 0; i < AchievementStorage.Achievements.Count; i++ )
             {
                 AchievementInfo achievement = AchievementStorage.Achievements[ i ];
@@ -27,7 +28,6 @@ namespace Assets.Achievements
                 achievementCopy.transform.SetParent( _achievementsScroll.content, false );
                 achievementCopy.GetComponentInChildren<Text>().text = achievement.Description;
             }
-
         }
 
         private void Update()
