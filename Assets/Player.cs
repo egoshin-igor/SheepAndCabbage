@@ -1,7 +1,5 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Assets.Enums;
 using Assets.Lines;
 using UnityEngine;
@@ -66,6 +64,7 @@ namespace Assets
                     OnWon();
                 }
             }
+            _timer.TimerLabel.color = _timer.TimeInSeconds > _levelManager.MaxTime ? Color.red : Color.white;
         }
 
         private void OnWon()

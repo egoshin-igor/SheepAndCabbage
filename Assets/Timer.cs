@@ -5,8 +5,7 @@ namespace Assets
 {
     public class Timer : MonoBehaviour
     {
-        [SerializeField]
-        private Text _timerLabel = null;
+        public Text TimerLabel = null;
 
         private float _time = 0;
         private bool _stop = false;
@@ -24,7 +23,7 @@ namespace Assets
             float seconds = _time % 60;
             float fraction = ( _time * 100 ) % 100;
 
-            _timerLabel.text = string.Format( "{0:00} : {1:00}", ( int )minutes, ( int )seconds );
+            TimerLabel.text = string.Format( "{0:00} : {1:00}", ( int )minutes, ( int )seconds );
         }
 
         public void Restart()

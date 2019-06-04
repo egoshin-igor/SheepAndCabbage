@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Assets.Achievements;
 using Assets.Util;
 using UnityEngine;
 using UnityEngine.UI;
@@ -32,9 +33,11 @@ namespace Assets
         private List<int> _linesCountCfs;
         private int _score = 0;
         private double _difficultCf = 0.01;
+        private AchievmentPresentator _achievmentPresentator;
 
         public int CharactersCount { get; private set; } = MinCharactersCount;
         public int LinesCount { get; private set; } = MinLinesCount;
+        public int MaxTime => _timeoutForLinesCount[ LinesCount ];
 
         public void OnGUI()
         {
@@ -48,13 +51,18 @@ namespace Assets
 
         public void Awake()
         {
-            _timeoutForLinesCount = new List<int> { 0, 0, 20, 40, 60 };
+            _timeoutForLinesCount = new List<int> { 0, 0, 30, 50, 80 };
             _linesCountCfs = new List<int> { 0, 0, 2, 10, 25 };
+            _achievmentPresentator = GameObject.Find( "AchievmentPresentator" ).GetComponent<AchievmentPresentator>();
             LoadData();
         }
 
         public void OnRoundEnded( int time )
         {
+            if ( _score == 0 )
+            {
+                _achievmentPresentator.Show( AchievementType.FirstLevelPassed );
+            }
             _difficultCf = ( ( double )CharactersCount - MinCharactersCount ) / ( MaxCharactersCount - MinCharactersCount );
             _difficultCf *= 10 / _linesCountCfs[ LinesCount ];
             _difficultCf = _difficultCf > 1 ? 1 : _difficultCf;
@@ -94,6 +102,14 @@ namespace Assets
             }
             _scoreLabel.text = _score.ToString();
             _pointsPerLevelLabel.text = newPoints.ToString();
+            if ( _score >= 200 )
+            {
+                _achievmentPresentator.Show( AchievementType.TwoHundredPointsAchieved );
+            }
+            if ( LinesCount == MaxLinesCount && DoubleUtil.EqualDoubles( _difficultCf, 1d ) )
+            {
+                _achievmentPresentator.Show( AchievementType.GameWon );
+            }
 
             SaveData();
         }
